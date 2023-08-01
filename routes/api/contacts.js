@@ -47,11 +47,19 @@ router.post("/", async (req, res, next) => {
   }
 });
 
-router.delete("/:id", async (req, res, next) => {
-  res.json({ message: "template message" });
+router.put("/:id", async (req, res, next) => {
+  try {
+    const { error } = addSchema.validate(req.body);
+    if (error) {
+      throw HttpError(400, error.message);
+    }
+    const { id } = req.params;
+  } catch (error) {
+    next(error);
+  }
 });
 
-router.put("/:id", async (req, res, next) => {
+router.delete("/:id", async (req, res, next) => {
   res.json({ message: "template message" });
 });
 
