@@ -54,13 +54,29 @@ router.put("/:id", async (req, res, next) => {
       throw HttpError(400, error.message);
     }
     const { id } = req.params;
+    const result = await contacts.updateById(id, req.body);
+    if (!result) {
+      throw HttpError(400, error.message);
+    }
+    res.json(result);
   } catch (error) {
     next(error);
   }
 });
 
 router.delete("/:id", async (req, res, next) => {
-  res.json({ message: "template message" });
+  try {
+    const { id } = req.params;
+    const result = await contacts.removeContact(id, req.body);
+    if (!result) {
+      throw HttpError(400, "Not found");
+    }
+    res.json({
+      message: "Delete success",
+    });
+  } catch (error) {
+    next(error);
+  }
 });
 
 module.exports = router;
