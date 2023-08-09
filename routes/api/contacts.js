@@ -1,84 +1,58 @@
 const express = require("express");
-const Joi = require("joi");
+// const Joi = require("joi");
 
-const contacts = require("../../controllers/contacts.js");
-const { HttpError } = require("../../helpers");
+const ctrl = require("../../controllers/contacts.js");
+const { schemas } = require("../../models/contact.js");
+const { isValidId, validateBody } = require("../../middlewares");
 
 const router = express.Router();
 
-const addSchema = Joi.object({
-  name: Joi.string().min(2).max(15).required(),
-  email: Joi.string()
-    .email({ minDomainSegments: 2, tlds: { allow: ["com", "net"] } })
-    .required(),
-  phone: Joi.string().required(),
-});
+router.get("/", ctrl.getAll);
 
-router.get("/", async (req, res, next) => {
-  try {
-    const result = await contacts.listContacts();
-    res.status(200).json({ result, message: "get req" });
-  } catch (error) {
-    next(error);
-  }
-});
+router.get("/:id", isValidId, ctrl.getContactById);
 
-router.get("/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const result = await contacts.getContactById(id);
-    if (!result) {
-      throw HttpError(404, "Not found");
-    }
-    res.status(200).json(result);
-  } catch (error) {
-    next(error);
-  }
-});
+router.post("/", validateBody(schemas.addSchema), ctrl.addContact);
 
-router.post("/", async (req, res, next) => {
-  try {
-    const { error } = addSchema.validate(req.body);
-    if (error) {
-      throw HttpError(400, error.message);
-    }
-    const result = await contacts.addContact(req.body);
-    res.status(201).json(result);
-  } catch (error) {
-    next(error);
-  }
-});
+router.put("/:id", isValidId, validateBody(schemas.addSchema), ctrl.updateById);
 
-router.put("/:id", async (req, res, next) => {
-  try {
-    const { error } = addSchema.validate(req.body);
-    if (error) {
-      throw HttpError(400, error.message);
-    }
-    const { id } = req.params;
-    const result = await contacts.updateById(id, req.body);
-    if (!result) {
-      throw HttpError(400, error.message);
-    }
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-});
+router.delete("/:id", isValidId, ctrl.deleteById);
 
-router.delete("/:id", async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const result = await contacts.removeContact(id, req.body);
-    if (!result) {
-      throw HttpError(400, "Not found");
-    }
-    res.json({
-      message: "Delete success",
-    });
-  } catch (error) {
-    next(error);
-  }
-});
+router.patch(
+  "/:id/favorite",
+  isValidId,
+  validateBody(schemas.updateFavoriteSchema),
+  ctrl.updateFavorite
+);
+// router.put("/:id", async (req, res, next) => {
+//   try {
+//     const { error } = addSchema.validate(req.body);
+//     if (error) {
+//       throw HttpError(400, error.message);
+//     }
+//     const { id } = req.params;
+//     const result = await contacts.updateById(id, req.body);
+//     if (!result) {
+//       throw HttpError(400, error.message);
+//     }
+//     res.json(result);
+//   } catch (error) {
+//     next(error);
+//   }
+// });
+
+// router.delete("/:id", async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const result = await contacts.removeContact(id, req.body);
+//     if (!result) {
+//       throw HttpError(400, "Not found");
+//     }
+//     res.json({
+//       message: "Delete success",
+//     });
+//   } catch (error) {
+//     next(error);
+//   }
+// });
 
 module.exports = router;
