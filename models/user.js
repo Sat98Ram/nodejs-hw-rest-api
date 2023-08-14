@@ -4,6 +4,7 @@ const Joi = require("joi");
 const { handleMongooseError } = require("../helpers");
 
 const emailRegExp = /^[a-z0-9]+@[a-z]+\.[a-z]{2,3}$/;
+const allowedSubscriptions = ["starter", "pro", "business"];
 
 const userSchema = new Schema(
   {
@@ -24,7 +25,7 @@ const userSchema = new Schema(
     },
     subscription: {
       type: String,
-      enum: ["starter", "pro", "business"],
+      enum: allowedSubscriptions,
       default: "starter",
     },
     token: {
@@ -51,7 +52,13 @@ const loginSchema = Joi.object({
   email: Joi.string().pattern(emailRegExp).required(),
 });
 
-const schemas = { registerSchema, loginSchema };
+const subscriptionSchema = Joi.object({
+  subscription: Joi.string()
+    .valid(...allowedSubscriptions)
+    .required(),
+});
+
+const schemas = { registerSchema, loginSchema, subscriptionSchema };
 
 module.exports = {
   User,
