@@ -1,5 +1,4 @@
 const express = require("express");
-// const Joi = require("joi");
 
 const ctrl = require("../../controllers/contacts.js");
 const { schemas } = require("../../models/contact.js");
